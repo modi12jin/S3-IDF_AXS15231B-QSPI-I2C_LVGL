@@ -82,12 +82,12 @@ static void example_lvgl_update_cb(lv_disp_drv_t *drv)
     case LV_DISP_ROT_NONE:
         // 旋转液晶显示屏
         esp_lcd_panel_swap_xy(panel_handle, false);
-        esp_lcd_panel_mirror(panel_handle, true, false);
+        esp_lcd_panel_mirror(panel_handle, false, false);
         // 旋转液晶触摸
-        // esp_lcd_touch_set_mirror_y(tp, false);
-        // esp_lcd_touch_set_mirror_x(tp, false);
+        esp_lcd_touch_set_mirror_y(tp, false);
+        esp_lcd_touch_set_mirror_x(tp, false);
         break;
-    case LV_DISP_ROT_90:
+    case LV_DISP_ROT_90: //AXS15231B硬件无法旋转
         // 旋转液晶显示屏
         esp_lcd_panel_swap_xy(panel_handle, true);
         esp_lcd_panel_mirror(panel_handle, true, true);
@@ -98,12 +98,12 @@ static void example_lvgl_update_cb(lv_disp_drv_t *drv)
     case LV_DISP_ROT_180:
         // 旋转液晶显示屏
         esp_lcd_panel_swap_xy(panel_handle, false);
-        esp_lcd_panel_mirror(panel_handle, false, true);
+        esp_lcd_panel_mirror(panel_handle, true, true);
         // 旋转液晶触摸
-        // esp_lcd_touch_set_mirror_y(tp, false);
-        // esp_lcd_touch_set_mirror_x(tp, false);
+        esp_lcd_touch_set_mirror_y(tp, false);
+        esp_lcd_touch_set_mirror_x(tp, false);
         break;
-    case LV_DISP_ROT_270:
+    case LV_DISP_ROT_270: //AXS15231B硬件无法旋转
         // 旋转液晶显示屏
         esp_lcd_panel_swap_xy(panel_handle, true);
         esp_lcd_panel_mirror(panel_handle, false, false);
@@ -256,9 +256,6 @@ void app_main(void)
 
     ESP_ERROR_CHECK(esp_lcd_panel_reset(panel_handle));
     ESP_ERROR_CHECK(esp_lcd_panel_init(panel_handle));
-    // esp_lcd_panel_swap_xy(panel_handle, false);
-    // esp_lcd_panel_mirror(panel_handle, true, false);
-    // esp_lcd_panel_set_gap(panel_handle,50,100);
     // 在打开屏幕或背光之前，用户可以将预定义的图案刷新到屏幕上
     ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(panel_handle, true));
 
@@ -343,6 +340,8 @@ void app_main(void)
     indev_drv.user_data = tp;
 
     lv_indev_drv_register(&indev_drv);
+
+    lv_disp_set_rotation(disp, LV_DISP_ROT_NONE);
 
     lvgl_mux = xSemaphoreCreateMutex();
     assert(lvgl_mux);
