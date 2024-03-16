@@ -310,12 +310,10 @@ void app_main(void)
     lv_init();
     // 分配 LVGL 使用的绘制缓冲区
     // 建议选择绘制缓冲区的大小至少为屏幕大小的 1/10
-    lv_color_t *buf1 = heap_caps_malloc(EXAMPLE_LCD_H_RES * 50 * sizeof(lv_color_t), MALLOC_CAP_DMA);
+    lv_color_t *buf1 = heap_caps_malloc(EXAMPLE_LCD_H_RES * EXAMPLE_LCD_V_RES * sizeof(lv_color_t), MALLOC_CAP_DMA);
     assert(buf1);
-    lv_color_t *buf2 = heap_caps_malloc(EXAMPLE_LCD_H_RES * 50 * sizeof(lv_color_t), MALLOC_CAP_DMA);
-    assert(buf2);
     // 初始化 LVGL 绘制缓冲区
-    lv_disp_draw_buf_init(&disp_buf, buf1, buf2, EXAMPLE_LCD_H_RES * 50);
+    lv_disp_draw_buf_init(&disp_buf, buf1, NULL, EXAMPLE_LCD_H_RES * EXAMPLE_LCD_V_RES);
 
     ESP_LOGI(TAG, "Register display driver to LVGL");
     lv_disp_drv_init(&disp_drv);
@@ -325,6 +323,7 @@ void app_main(void)
     disp_drv.drv_update_cb = example_lvgl_update_cb;
     disp_drv.draw_buf = &disp_buf;
     disp_drv.user_data = panel_handle;
+    disp_drv.full_refresh = 1;
     lv_disp_t *disp = lv_disp_drv_register(&disp_drv);
 
     ESP_LOGI(TAG, "Install LVGL tick timer");
@@ -344,8 +343,6 @@ void app_main(void)
     indev_drv.user_data = tp;
 
     lv_indev_drv_register(&indev_drv);
-
-    // (void)disp;
 
     lvgl_mux = xSemaphoreCreateMutex();
     assert(lvgl_mux);
